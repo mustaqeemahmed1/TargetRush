@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Target Rush — Arcade Aim & Reflex Trainer</title>
+  <meta name="description" content="A fast-paced reaction and accuracy browser game. Test your reflexes, build combos, and beat your high score in 30 seconds!">
+  
+  <!-- Google Fonts for futuristic arcade typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;900&family=Orbitron:wght@600;800;900&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Ambient background elements -->
+  <div class="ambient-glow glow-top"></div>
+  <div class="ambient-glow glow-bottom"></div>
+  <div class="grid-overlay"></div>
+
+  <!-- Main Container -->
+  <div class="game-wrapper">
+    <!-- Header / HUD Bar -->
+    <header class="game-header">
+      <div class="brand">
+        <span class="brand-icon">🎯</span>
+        <h1 class="brand-title">TARGET <span class="highlight">RUSH</span></h1>
+      </div>
+
+      <div class="hud-stats">
+        <div class="hud-card" title="Current Score">
+          <span class="hud-label">SCORE</span>
+          <span class="hud-value" id="hud-score">0</span>
+        </div>
+
+        <div class="hud-card combo-card" title="Current Combo Multiplier">
+          <span class="hud-label">COMBO</span>
+          <div class="combo-wrap">
+            <span class="hud-value" id="hud-combo">0</span>
+            <span class="combo-multiplier" id="hud-multiplier">x1.0</span>
+          </div>
+        </div>
+
+        <div class="hud-card" title="Click Accuracy">
+          <span class="hud-label">ACCURACY</span>
+          <span class="hud-value" id="hud-accuracy">100%</span>
+        </div>
+
+        <div class="hud-card timer-card" title="Time Remaining">
+          <span class="hud-label">TIME</span>
+          <div class="timer-display">
+            <span class="hud-value timer-val" id="hud-timer">30.0s</span>
+            <div class="timer-bar-track">
+              <div class="timer-bar-fill" id="timer-bar"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="hud-actions">
+          <button id="sound-toggle-btn" class="icon-btn" aria-label="Toggle Sound" title="Toggle Sound">
+            <span id="sound-icon">🔊</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Game Arena -->
+    <main class="arena-container">
+      <div id="game-arena" class="game-arena" tabindex="0" role="region" aria-label="Target Shooting Field">
+        <!-- Crosshairs and tech grid decals -->
+        <div class="arena-crosshair top-left"></div>
+        <div class="arena-crosshair top-right"></div>
+        <div class="arena-crosshair bottom-left"></div>
+        <div class="arena-crosshair bottom-right"></div>
+        <div class="arena-center-reticle"></div>
+
+        <!-- Floating Text & Hit Particles Container -->
+        <div id="fx-layer" class="fx-layer"></div>
+
+        <!-- Targets will be dynamically appended here -->
+        <div id="targets-layer" class="targets-layer"></div>
+
+        <!-- START SCREEN OVERLAY -->
+        <div id="start-screen" class="overlay-screen active">
+          <div class="screen-dialog glass-panel">
+            <div class="dialog-badge">FAST-PACED REFLEX CHALLENGE</div>
+            <h2 class="dialog-title">TARGET <span class="neon-text">RUSH</span></h2>
+            <p class="dialog-tagline">Test Your Reflexes. Beat Your Score.</p>
+
+            <div class="rules-summary">
+              <div class="rule-card">
+                <span class="rule-icon">⏱️</span>
+                <span class="rule-text"><strong>30 Seconds</strong> on the clock</span>
+              </div>
+              <div class="rule-card">
+                <span class="rule-icon">⚡</span>
+                <span class="rule-text"><strong>Chain hits</strong> for combo multipliers</span>
+              </div>
+              <div class="rule-card">
+                <span class="rule-icon">⚠️</span>
+                <span class="rule-text"><strong>Avoid Danger</strong> targets at all costs</span>
+              </div>
+            </div>
+
+            <!-- Target Types Legend -->
+            <div class="targets-legend">
+              <h3 class="legend-heading">TARGET TYPES</h3>
+              <div class="legend-grid">
+                <div class="legend-item target-legend-normal">
+                  <div class="legend-target-preview preview-normal">
+                    <span class="preview-ring"></span>
+                    <span class="preview-core"></span>
+                  </div>
+                  <div class="legend-info">
+                    <span class="legend-name">Normal</span>
+                    <span class="legend-score">+10 PTS</span>
+                  </div>
+                </div>
+
+                <div class="legend-item target-legend-fast">
+                  <div class="legend-target-preview preview-fast">
+                    <span class="preview-ring"></span>
+                    <span class="preview-core"></span>
+                  </div>
+                  <div class="legend-info">
+                    <span class="legend-name">Fast</span>
+                    <span class="legend-score">+20 PTS</span>
+                  </div>
+                </div>
+
+                <div class="legend-item target-legend-bonus">
+                  <div class="legend-target-preview preview-bonus">
+                    <span class="preview-ring"></span>
+                    <span class="preview-core">★</span>
+                  </div>
+                  <div class="legend-info">
+                    <span class="legend-name">Bonus</span>
+                    <span class="legend-score">+50 PTS</span>
+                  </div>
+                </div>
+
+                <div class="legend-item target-legend-danger">
+                  <div class="legend-target-preview preview-danger">
+                    <span class="preview-ring"></span>
+                    <span class="preview-core">✕</span>
+                  </div>
+                  <div class="legend-info">
+                    <span class="legend-name">Danger</span>
+                    <span class="legend-score penalty">-25 PTS & Reset</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="high-score-banner">
+              <span class="trophy-icon">🏆</span>
+              <span>All-Time High Score: <strong id="start-high-score">0</strong></span>
+            </div>
+
+            <button id="start-btn" class="btn btn-primary btn-glow">
+              <span class="btn-text">START GAME</span>
+              <span class="btn-arrow">→</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- GAME OVER / RESULTS MODAL -->
+        <div id="game-over-screen" class="overlay-screen">
+          <div class="screen-dialog glass-panel results-dialog">
+            <div id="new-record-badge" class="dialog-badge highlight-badge hidden">🎉 NEW HIGH SCORE!</div>
+            <div class="dialog-badge default-record-badge" id="default-badge">MISSION COMPLETE</div>
+            
+            <h2 class="dialog-title results-title">FINAL SCORE</h2>
+            <div class="final-score-display" id="results-score">0</div>
+
+            <!-- Stats Grid -->
+            <div class="results-stats-grid">
+              <div class="result-stat-box">
+                <span class="stat-box-label">TARGETS HIT</span>
+                <span class="stat-box-value" id="results-hits">0</span>
+              </div>
+              <div class="result-stat-box">
+                <span class="stat-box-label">ACCURACY</span>
+                <span class="stat-box-value" id="results-accuracy">0%</span>
+              </div>
+              <div class="result-stat-box">
+                <span class="stat-box-label">BEST REACTION</span>
+                <span class="stat-box-value" id="results-reaction">0 ms</span>
+              </div>
+              <div class="result-stat-box">
+                <span class="stat-box-label">MAX COMBO</span>
+                <span class="stat-box-value" id="results-max-combo">0</span>
+              </div>
+            </div>
+
+            <div class="high-score-banner">
+              <span class="trophy-icon">🏆</span>
+              <span>Personal Best: <strong id="results-high-score">0</strong></span>
+            </div>
+
+            <div class="dialog-buttons">
+              <button id="restart-btn" class="btn btn-primary btn-glow">
+                <span class="btn-text">PLAY AGAIN</span>
+                <span class="btn-arrow">↺</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Ready Countdown (3, 2, 1, RUSH!) -->
+        <div id="countdown-overlay" class="countdown-overlay">
+          <span id="countdown-number" class="countdown-number">3</span>
+        </div>
+      </div>
+    </main>
+
+    <!-- Footer info -->
+    <footer class="game-footer">
+      <div class="footer-hint">Click or tap targets before they vanish. Avoid danger targets!</div>
+      <div class="footer-meta">Pure Vanilla HTML5 • CSS3 • JavaScript</div>
+    </footer>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
